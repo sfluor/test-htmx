@@ -1,35 +1,45 @@
 package components
 
 import (
-	"github.com/sfluor/test-htmx/views/model"
-	"strconv"
-    "fmt"
+"fmt"
+"github.com/sfluor/test-htmx/views/model"
+"strconv"
 )
 
 templ Index(todos []model.Todo) {
-	<!DOCTYPE html>
-	<html lang="en">
-		@Header()
-		<body>
-			<h1>Todo list </h1>
-			<ul id="todolist">
-				for _, todo := range todos {
-					@Todo(todo)
-				}
-			</ul>
-			<form hx-target="#todolist" hx-swap="beforeend" hx-post="/todos">
-                <input type="text" name="title" />
-				<button>
-					Add
-				</button>
-			</form>
-		</body>
-	</html>
+<!DOCTYPE html>
+<html lang="en">
+@Header()
+
+<body class="container mx-auto p-8 bg-slate-50">
+    <h1 class="text-2xl">Todo list </h1>
+    <ul id="todolist" class="max-w-lg">
+        for _, todo := range todos {
+        @Todo(todo)
+        }
+    </ul>
+    <form hx-target="#todolist" hx-swap="beforeend" hx-post="/todos">
+        @input("title")
+        @button("blue", "+ Add", templ.Attributes{})
+    </form>
+</body>
+
+</html>
 }
 
 templ Todo(todo model.Todo) {
-	<li>
-		[{ strconv.Itoa(todo.ID) }] { todo.Title }
-        <button hx-target="closest li" hx-swap="outerHTML" hx-delete={ string(templ.URL(fmt.Sprintf("/todos/%d", todo.ID)))}>Clear</button>
-	</li>
+<li class="box bg-teal-50 rounded-lg p-4 m-2 flex justify-between items-center flex-row">
+    [{ strconv.Itoa(todo.ID) }] { todo.Title }
+    @button("red", "- Clear", templ.Attributes{"hx-target": "closest li", "hx-swap": "outerHTML", "hx-delete" :
+    string(templ.URL(fmt.Sprintf("/todos/%d", todo.ID)))})
+</li>
+}
+
+templ button(color string, content string, attrs templ.Attributes) {
+<button class={fmt.Sprintf("bg-%s-50 p-2 rounded m-2 hover:bg-%s-400 focus:bg-%s-800", color, color, color)} {attrs...}>
+    {content}</button>
+}
+
+templ input(name string) {
+        <input class="p-2 border-solid border-2 border-blue-300 focus:border-blue-600" type="text" name={name} />
 }
