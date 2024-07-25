@@ -1,0 +1,35 @@
+package components
+
+import (
+	"github.com/sfluor/test-htmx/views/model"
+	"strconv"
+    "fmt"
+)
+
+templ Index(todos []model.Todo) {
+	<!DOCTYPE html>
+	<html lang="en">
+		@Header()
+		<body>
+			<h1>Todo list </h1>
+			<ul id="todolist">
+				for _, todo := range todos {
+					@Todo(todo)
+				}
+			</ul>
+			<form hx-target="#todolist" hx-swap="beforeend" hx-post="/todos">
+                <input type="text" name="title" />
+				<button>
+					Add
+				</button>
+			</form>
+		</body>
+	</html>
+}
+
+templ Todo(todo model.Todo) {
+	<li>
+		[{ strconv.Itoa(todo.ID) }] { todo.Title }
+        <button hx-target="closest li" hx-swap="outerHTML" hx-delete={ string(templ.URL(fmt.Sprintf("/todos/%d", todo.ID)))}>Clear</button>
+	</li>
+}
