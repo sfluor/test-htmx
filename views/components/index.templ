@@ -6,7 +6,7 @@ import (
 "strconv"
 )
 
-templ Index(todos []model.Todo) {
+templ Todos(todos []model.Todo) {
 <!DOCTYPE html>
 <html lang="en">
 @Header()
@@ -20,7 +20,7 @@ templ Index(todos []model.Todo) {
     </ul>
     <form hx-target="#todolist" hx-swap="beforeend" hx-post="/todos">
         @input("title")
-        @button("blue", "+ Add", templ.Attributes{})
+        @primaryButton("+ Add", templ.Attributes{})
     </form>
 </body>
 
@@ -28,16 +28,23 @@ templ Index(todos []model.Todo) {
 }
 
 templ Todo(todo model.Todo) {
-<li class="box bg-teal-50 rounded-lg p-4 m-2 flex justify-between items-center flex-row">
+<li class="hover:duration-500 shadow-xl box bg-teal-50 hover:bg-teal-400 rounded-lg p-4 m-2 flex justify-between items-center flex-row">
     [{ strconv.Itoa(todo.ID) }] { todo.Title }
-    @button("red", "- Clear", templ.Attributes{"hx-target": "closest li", "hx-swap": "outerHTML", "hx-delete" :
+    @dangerButton("- Clear", templ.Attributes{"hx-target": "closest li", "hx-swap": "outerHTML", "hx-delete" :
     string(templ.URL(fmt.Sprintf("/todos/%d", todo.ID)))})
 </li>
 }
 
-templ button(color string, content string, attrs templ.Attributes) {
-<button class={fmt.Sprintf("bg-%s-50 p-2 rounded m-2 hover:bg-%s-400 focus:bg-%s-800", color, color, color)} {attrs...}>
-    {content}</button>
+templ primaryButton(content string, attrs templ.Attributes) {
+@button("bg-blue-50 hover:bg-blue-400 focus:bg-blue-800", content, attrs)
+}
+
+templ dangerButton(content string, attrs templ.Attributes) {
+@button("bg-red-50 hover:bg-red-400 focus:bg-red-800", content, attrs)
+}
+
+templ button(class string, content string, attrs templ.Attributes) {
+<button class={"hover:scale-110 duration-300 focus:scale-90 p-2 rounded m-2 shadow-lg box hover:shadow-none focus:shadow-inner " +class} {attrs...}>{content}</button>
 }
 
 templ input(name string) {

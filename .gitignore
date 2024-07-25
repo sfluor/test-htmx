@@ -1,3 +1,4 @@
 *_templ.go
 tmp/
 test-htmx
+static/tailwind_out.css

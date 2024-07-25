@@ -18,9 +18,13 @@ func main() {
 		{ID: 3, Title: "Workout"},
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    http.HandleFunc("GET /static/tailwind_out.css", func(w http.ResponseWriter, r *http.Request) {
+        http.ServeFile(w, r, "./static/tailwind_out.css")
+    })
+
+	http.HandleFunc("GET /todos", func(w http.ResponseWriter, r *http.Request) {
 		// w.Header().Set("Access-Control-Allow-Origin", "*")
-		component := components.Index(todos)
+		component := components.Todos(todos)
 		component.Render(r.Context(), w)
 	})
 

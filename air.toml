@@ -1,7 +1,7 @@
 root = "."
 
 [build]
-pre_cmd = ["templ generate"]
+pre_cmd = ["templ generate", "npx tailwindcss -i ./static/input.css -o ./static/tailwind_out.css"]
 bin = "./test-htmx"
 cmd = "go build -o ./test-htmx ."
 include_ext = ["go", "templ"]
