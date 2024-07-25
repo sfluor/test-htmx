@@ -19,6 +19,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// w.Header().Set("Access-Control-Allow-Origin", "*")
 		component := components.Index(todos)
 		component.Render(r.Context(), w)
 	})
@@ -49,5 +50,6 @@ func main() {
 		}
 	})
 
+    log.Print("Listening...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
