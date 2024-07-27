@@ -5,18 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/sfluor/test-htmx/views/components"
+	"github.com/sfluor/test-htmx/views/components/todos"
 	"github.com/sfluor/test-htmx/views/model"
 )
 
 
 func RegisterTodos(db model.TodoDB) {
-	http.HandleFunc("GET /static/tailwind_out.css", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/tailwind_out.css")
-	})
-
 	http.HandleFunc("GET /todos", func(w http.ResponseWriter, r *http.Request) {
-		component := components.Todos(db.ListTodos())
+		component := todos.Todos(db.ListTodos())
 		component.Render(r.Context(), w)
 	})
 
@@ -29,7 +25,7 @@ func RegisterTodos(db model.TodoDB) {
 
         todo := db.AddTodo(title)
 		log.Printf("Created todo; %+v", r.URL.Path)
-		components.Todo(todo).Render(r.Context(), w)
+		todos.Todo(todo).Render(r.Context(), w)
 	})
 
 	http.HandleFunc("DELETE /todos/{id}", func(w http.ResponseWriter, r *http.Request) {

@@ -1,7 +1,10 @@
 root = "."
 
 [build]
-pre_cmd = ["templ generate", "npx tailwindcss -i ./static/input.css -o ./static/tailwind_out.css"]
+pre_cmd = [
+    "templ generate",
+    "npx tailwindcss -i ./static/input.css -o ./static/tailwind_out.css",
+]
 bin = "./test-htmx"
 cmd = "go build -o ./test-htmx ."
 include_ext = ["go", "templ"]
@@ -13,6 +16,6 @@ send_interrupt = true
 
 # Enable live-reloading on the browser.
 [proxy]
-  enabled = true
-  proxy_port = 8090
-  app_port = 8080
+enabled = true
+proxy_port = 8090
+app_port = 8080

@@ -1,15 +1,16 @@
-package components
+package todos
 
 import (
 "fmt"
-"github.com/sfluor/test-htmx/views/model"
 "strconv"
+"github.com/sfluor/test-htmx/views/model"
+"github.com/sfluor/test-htmx/views/components"
 )
 
 templ Todos(todos []model.Todo) {
 <!DOCTYPE html>
 <html lang="en">
-@Header()
+@components.Header("Todo App")
 
 <body class="container mx-auto p-8 bg-slate-50">
     <h1 class="text-2xl">Todo list </h1>
@@ -28,7 +29,8 @@ templ Todos(todos []model.Todo) {
 }
 
 templ Todo(todo model.Todo) {
-<li class="hover:duration-500 shadow-xl box bg-teal-50 hover:bg-teal-400 rounded-lg p-4 m-2 flex justify-between items-center flex-row">
+<li
+    class="hover:duration-500 shadow-xl box bg-teal-50 hover:bg-teal-400 rounded-lg p-4 m-2 flex justify-between items-center flex-row">
     [{ strconv.Itoa(todo.ID) }] { todo.Title }
     @dangerButton("- Clear", templ.Attributes{"hx-target": "closest li", "hx-swap": "outerHTML", "hx-delete" :
     string(templ.URL(fmt.Sprintf("/todos/%d", todo.ID)))})
@@ -48,5 +50,5 @@ templ button(class string, content string, attrs templ.Attributes) {
 }
 
 templ input(name string) {
-        <input class="p-2 border-solid border-2 border-blue-300 focus:border-blue-600" type="text" name={name} />
+        <input class=" p-2 border-solid border-2 border-blue-300 focus:border-blue-600" type="text" name={name} />
 }

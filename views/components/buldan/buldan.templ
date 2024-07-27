@@ -1,0 +1,56 @@
+package buldan
+
+import "github.com/sfluor/test-htmx/views/components"
+
+templ BuldanHome() {
+<!DOCTYPE html>
+<html lang="en">
+@components.Header("Buldan")
+
+<body class="container mx-auto p-8 bg-slate-50 font-sans">
+    <div class="flex flex-col items-center gap-y-24">
+        <div class="text-5xl subpixel-antialiased font-semibold">
+            @primary("Bul")
+            @secondary("dan")
+        </div>
+        <div class="text-2xl">
+            @secondary("Start ")
+            @primary("guessing !")
+        </div>
+        <div class="flex flex-row self-center gap-x-12">
+            @primaryButton("New game", templ.Attributes{})
+            @secondaryButton("Join game", templ.Attributes{})
+        </div>
+    </div>
+</body>
+
+</html>
+}
+
+templ primary(content string) {
+<span class="text-blue-500">{content}</span>
+}
+
+
+templ secondary(content string) {
+<span class="text-orange-500">{content}</span>
+}
+
+const buttonBaseClass = "min-w-36 min-h-12 text-white font-bold py-2 px-4 rounded transition duration-500 border-b-4 focus:border-b-0"
+const blueClass = "bg-blue-500 hover:bg-blue-400 border-blue-700 hover:border-blue-500"
+const orangeClass = "bg-orange-500 hover:bg-orange-400 border-orange-700 hover:border-orange-500"
+
+const blueButton = buttonBaseClass + " " + blueClass
+const orangeButton = buttonBaseClass + " " + orangeClass
+
+templ primaryButton(content string, attrs templ.Attributes) {
+@button(blueButton, content, attrs)
+}
+
+templ secondaryButton(content string, attrs templ.Attributes) {
+@button(orangeButton, content, attrs)
+}
+
+templ button(class string, content string, attrs templ.Attributes) {
+<button class={ class } { attrs... }>{ content }</button>
+}
