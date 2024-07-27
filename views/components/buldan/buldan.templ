@@ -1,42 +1,98 @@
 package buldan
 
-import "github.com/sfluor/test-htmx/views/components"
+import (
+	"fmt"
+	"github.com/sfluor/test-htmx/views/components"
+	"github.com/sfluor/test-htmx/views/model/buldan"
+)
 
-templ BuldanHome() {
-<!DOCTYPE html>
-<html lang="en">
-@components.Header("Buldan")
+templ container() {
+	<!DOCTYPE html>
+	<html lang="en">
+		@components.Header("Buldan")
+		<body class="container mx-auto p-8 bg-slate-50 font-sans">
+			{ children... }
+			@errorToast("Nothing to signal !")
+		</body>
+		<script>
+    const toast = document.getElementById("error-toast");
+    toast.style.opacity = 0;
 
-<body class="container mx-auto p-8 bg-slate-50 font-sans">
-    <div class="flex flex-col items-center gap-y-24">
-        <div class="text-5xl subpixel-antialiased font-semibold">
-            @primary("Bul")
-            @secondary("dan")
-        </div>
-        <div class="text-2xl">
-            @secondary("Start ")
-            @primary("guessing !")
-        </div>
-        <div class="flex flex-row self-center gap-x-12">
-            @primaryButton("New game", templ.Attributes{})
-            @secondaryButton("Join game", templ.Attributes{})
-        </div>
-    </div>
-</body>
+    document.body.addEventListener("toast", e => {
+        toast.innerHTML = e.detail.message;
+        toast.style.opacity = 1;
+        // TODO there could be a race condition here
+        setInterval(() => toast.style.opacity = 0, 5000);
+        console.error("toast err: ", e.detail.message);
+    });
+</script>
+	</html>
+}
 
-</html>
+templ Home(defaultName string) {
+	@container() {
+		<form class="flex flex-col items-center gap-y-16">
+			<div class="text-5xl subpixel-antialiased font-semibold">
+				@secondary("Bul")
+				@primary("dan")
+			</div>
+			<div class="text-2xl items-center">
+				@primary("Welcome to:")
+				<br/>
+				<br/>
+				@input("name", defaultName)
+			</div>
+			<div class="text-2xl">
+				@secondary("Start ")
+				@primary("guessing !")
+			</div>
+			<div class="flex flex-row self-center gap-x-12">
+				@primaryButton("New game", templ.Attributes{
+					"hx-post": "/buldan/new",
+					"hx-swap": "closest body",
+				})
+				@secondaryButton("Join game", templ.Attributes{})
+			</div>
+		</form>
+	}
+}
+
+templ PreLobby(stream string) {
+	@container() {
+		<div hx-sse={ fmt.Sprintf("connect:%s swap:message", stream) }></div>
+	}
+}
+
+templ Lobby(player string, game buldan.GameInstance) {
+	@container() {
+		<div>
+			Lobby for { game.ID } and { player }
+		</div>
+	}
+}
+
+templ input(name string, value string) {
+	<input
+		type="text"
+		name={ name }
+		value={ value }
+		class="focus:border-orange-500 focus:text-blue-500 outline-none box border border-solid border-blue-500 border-b-4 px-4 py-2 text-orange-500 font-semibold border-r-4 transition duration-1000 max-w-80"
+	/>
 }
 
 templ primary(content string) {
-<span class="text-blue-500">{content}</span>
+	<span class="text-blue-500">{ content }</span>
 }
-
 
 templ secondary(content string) {
-<span class="text-orange-500">{content}</span>
+	<span class="text-orange-500">{ content }</span>
 }
 
-const buttonBaseClass = "min-w-36 min-h-12 text-white font-bold py-2 px-4 rounded transition duration-500 border-b-4 focus:border-b-0"
+// Just for formatting, otherwise it gets splitted into multiple lines
+const buttonBaseClassSizes = "min-w-36 min-h-12 font-bold py-2 px-4 border-b-4 border-r-4"
+const buttonBaseClassAnim = "text-white rounded transition duration-500 focus:border-b-0 focus:border-r-0"
+const buttonBaseClass = buttonBaseClassAnim + " " + buttonBaseClassSizes
+
 const blueClass = "bg-blue-500 hover:bg-blue-400 border-blue-700 hover:border-blue-500"
 const orangeClass = "bg-orange-500 hover:bg-orange-400 border-orange-700 hover:border-orange-500"
 
@@ -44,13 +100,22 @@ const blueButton = buttonBaseClass + " " + blueClass
 const orangeButton = buttonBaseClass + " " + orangeClass
 
 templ primaryButton(content string, attrs templ.Attributes) {
-@button(blueButton, content, attrs)
+	@button(blueButton, content, attrs)
 }
 
 templ secondaryButton(content string, attrs templ.Attributes) {
-@button(orangeButton, content, attrs)
+	@button(orangeButton, content, attrs)
 }
 
 templ button(class string, content string, attrs templ.Attributes) {
-<button class={ class } { attrs... }>{ content }</button>
+	<button class={ class } { attrs... }>{ content }</button>
+}
+
+templ errorToast(content string) {
+	<div
+		id="error-toast"
+		class="transition duration-1000 animate-bounce rounded fixed bottom-8 right-20 text-white bg-red-500 px-4 py-2 font-semibold border-b-4 border-r-4 border-solide border-red-800 max-w-80 text-xl"
+	>
+		{ content }
+	</div>
 }

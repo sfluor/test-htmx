@@ -16,7 +16,7 @@ func main() {
 	})
 
     routes.RegisterTodos(model.NewTodoDB())
-    routes.RegisterBuldan(buldan.NewEngine())
+    routes.RegisterBuldan(buldan.NewDefaultEngine())
 
 	log.Print("Listening...")
 	log.Fatal(http.ListenAndServe(":8080", nil))

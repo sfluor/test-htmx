@@ -1,9 +1,9 @@
 package buldan
 
 import (
-	"math/rand"
 	crand "crypto/rand"
 	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -52,11 +52,13 @@ type GuessResult struct {
 }
 
 type DB interface {
+	Get(ID string) (GameInstance, bool, error)
+
 	CreateLobby(admin Player) (GameInstance, error)
 
 	UpdateSettings(ID string, settings GameSettings) error
 
-	JoinGame(ID string, player Player) error
+	JoinGame(ID string, player Player) (GameInstance, error)
 
 	StartGame(ID string) error
 
@@ -80,6 +82,19 @@ func NewInMemory() DB {
 		guessesByGame: make(map[string][]Guess),
 	}
 }
+
+
+// Get implements DB.
+func (i *inMemoryDB) Get(ID string) (GameInstance, bool, error) {
+    game, ok := i.instances[ID]
+
+    if !ok {
+        return GameInstance{}, false, nil
+    }
+
+    return *game, ok, nil
+}
+
 
 func (i *inMemoryDB) nextGameID() string {
 	id := ""
@@ -116,7 +131,6 @@ func (i *inMemoryDB) CreateLobby(admin Player) (GameInstance, error) {
 	return game, nil
 }
 
-
 func (i *inMemoryDB) advancePlayer(gi *GameInstance) Player {
 	gi.CurrentPlayerIndex++
 	if gi.CurrentPlayerIndex >= len(gi.Players) {
@@ -125,7 +139,6 @@ func (i *inMemoryDB) advancePlayer(gi *GameInstance) Player {
 
 	return gi.Players[gi.CurrentPlayerIndex]
 }
-
 
 // Guess implements DB.
 func (i *inMemoryDB) Guess(ID string, player Player, guess string) (GuessResult, error) {
@@ -159,33 +172,33 @@ func (i *inMemoryDB) Guess(ID string, player Player, guess string) (GuessResult,
 }
 
 // JoinGame implements DB.
-func (i *inMemoryDB) JoinGame(ID string, player Player) error {
+func (i *inMemoryDB) JoinGame(ID string, player Player) (GameInstance, error) {
 	// TODO: check duplicate IDs
 	game, ok := i.instances[ID]
 	if !ok {
-		return fmt.Errorf("No game found with ID: %s", ID)
+		return GameInstance{}, fmt.Errorf("No game found with ID: %s", ID)
 	}
 
-    for _, p := range game.Players {
-        if p.ID == player.ID {
-            return fmt.Errorf("A player is already registered with this ID: %s", p.ID)
-        }
-    }
+	for _, p := range game.Players {
+		if p.ID == player.ID {
+			return GameInstance{},fmt.Errorf("A player is already registered with this ID: %s", p.ID)
+		}
+	}
 
-    game.Players = append(game.Players, player)
-    return nil
+	game.Players = append(game.Players, player)
+	return *game, nil
 }
 
 // OpenLobbies implements DB.
 func (i *inMemoryDB) OpenLobbies() ([]GameInstance, error) {
-    lobbies := make([]GameInstance, 0)
+	lobbies := make([]GameInstance, 0)
 
-    for _, game := range i.instances {
-        if game.Status == GameStatusLobby {
-            lobbies = append(lobbies, *game)
-        }
-    }
-    return lobbies, nil
+	for _, game := range i.instances {
+		if game.Status == GameStatusLobby {
+			lobbies = append(lobbies, *game)
+		}
+	}
+	return lobbies, nil
 }
 
 const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -197,10 +210,10 @@ func (i *inMemoryDB) StartGame(ID string) error {
 		return fmt.Errorf("No game found with ID: %s", ID)
 	}
 
-    game.Status = GameStatusRunning
-    game.CurrentLetter = rune(letters[rand.Intn(len(letters))])
+	game.Status = GameStatusRunning
+	game.CurrentLetter = rune(letters[rand.Intn(len(letters))])
 
-    return nil
+	return nil
 }
 
 // UpdateSettings implements DB.
@@ -210,7 +223,6 @@ func (i *inMemoryDB) UpdateSettings(ID string, settings GameSettings) error {
 		return fmt.Errorf("No game found with ID: %s", ID)
 	}
 
-    game.GameSettings = settings
-    return nil
+	game.GameSettings = settings
+	return nil
 }
-
